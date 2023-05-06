@@ -8,6 +8,9 @@ let limit = (variables['limit']) ? parseInt(variables['limit']) : 500;
 let timeout = (variables['timeout']) ? parseInt(variables['timeout']) : 2500;
 let parse_link = (variables['parse_url']) ? variables['parse_url'] : '';
 
+console.log(parse_link);
+return;
+
 if(!parse_link)
 {
 	//https://www.99.co/id/jual/rumah/bali?harga_maks=1,25mily&hlmn=
