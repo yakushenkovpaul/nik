@@ -29,6 +29,11 @@ let parse = (parse_link, parse_page, limit, timeout, callback) => {
 
 			let num = urls.length;
 
+			if(num === 0)
+			{
+				console.log('There is no data in this page. Update headers.js');
+			}
+
 			if(num > 0) {
 				urls.each((index, element) => {
 					setTimeout(() => {
