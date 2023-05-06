@@ -1,11 +1,16 @@
 const mongoConnect = require('./utils/mongodb').mongoConnect;
 const Product = require('./models/product');
 const parse = require('./utils/parse').parse;
+const variables = require('./utils/args');
+
+let start = (variables['start']) ? parseInt(variables['start']) : 1;
+let limit = (variables['limit']) ? parseInt(variables['limit']) : 500;
+let timeout = (variables['timeout']) ? parseInt(variables['timeout']) : 2500;
 
 const parse_link = 'https://www.99.co/id/jual/rumah/bali?harga_maks=1,25mily&hlmn=';
 
 mongoConnect(() => {
-	parse(parse_link, 37, 500, 2500, (data) => {
+	parse(parse_link, start, limit, timeout, (data) => {
 		if(data.url !== undefined && data.url.length > 0)
 		{
 			const product = new Product(data.url, data)
