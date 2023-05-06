@@ -29,8 +29,6 @@ let parse = (parse_link, parse_page, limit, timeout, callback) => {
 
 			let num = urls.length;
 
-			console.log('Total: ' + num);
-
 			if(num > 0) {
 				urls.each((index, element) => {
 					setTimeout(() => {
