@@ -4,6 +4,14 @@ const moment = require('moment');
 const headers = require('./headers');
 const fs = require('fs');
 
+const filename = 'parse.txt';
+
+if (fs.existsSync(filename)) {
+	fs.unlink('parse.txt', (err) => {
+		if (err) throw err;
+	})
+};
+
 let parse = (parse_link, parse_page, limit, timeout, callback) => {
 
 	let current_parse_link = parse_link + parse_page;
@@ -23,7 +31,7 @@ let parse = (parse_link, parse_page, limit, timeout, callback) => {
 
 			console.log('Page: ' + current_parse_link);
 
-			fs.appendFile('parse.txt', current_parse_link + "\n", function(err) {
+			fs.appendFile(filename, current_parse_link + "\n", function(err) {
 				if (err) throw err;
 			});
 
