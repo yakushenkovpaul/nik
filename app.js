@@ -2,7 +2,7 @@ const mongoConnect = require('./utils/mongodb').mongoConnect;
 const Product = require('./models/product');
 const parse = require('./utils/parse').parse;
 
-const parse_link = 'https://www.99.co/id/sewa/rumah/bali?hlmn=';
+const parse_link = 'https://www.99.co/id/jual/rumah/bali?harga_maks=1,25mily?hlmn=';
 
 mongoConnect(() => {
 	parse(parse_link, 11, 500, 2500, (data) => {
