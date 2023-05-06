@@ -23,6 +23,10 @@ let parse = (parse_link, parse_page, limit, timeout, callback) => {
 
 			console.log('Page: ' + current_parse_link);
 
+			fs.appendFile('parse.txt', current_parse_link + "\n", function(err) {
+				if (err) throw err;
+			});
+
 			const $ = cheerio.load(html);
 
 			const urls = $('a.ui-molecules-secondary-card__link');
