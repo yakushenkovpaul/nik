@@ -25,9 +25,6 @@ if(!parse_id && !parse_links[parse_id])
 
 const parse_link = parse_links[parse_id];
 
-console.log('Start parsing from: ' + parse_link + start + ' to ' + limit);
-return;
-
 mongoConnect(() => {
 	parse(parse_link, start, limit, timeout, (data) => {
 		if(data.url !== undefined && data.url.length > 0)
