@@ -6,11 +6,11 @@ const fs = require('fs');
 
 const filename = 'parse.txt';
 
-if (fs.existsSync(filename)) {
-	fs.unlink('parse.txt', (err) => {
-		if (err) throw err;
-	})
-};
+// if (fs.existsSync(filename)) {
+// 	fs.unlink('parse.txt', (err) => {
+// 		if (err) throw err;
+// 	})
+// };
 
 let parse = (parse_link, parse_page, limit, timeout, callback) => {
 
@@ -31,9 +31,9 @@ let parse = (parse_link, parse_page, limit, timeout, callback) => {
 
 			console.log('Page: ' + current_parse_link);
 
-			fs.appendFile(filename, current_parse_link + "\n", function(err) {
-				if (err) throw err;
-			});
+			// fs.appendFile(filename, current_parse_link + "\n", function(err) {
+			// 	if (err) throw err;
+			// });
 
 			const $ = cheerio.load(html);
 
