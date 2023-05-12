@@ -84,16 +84,19 @@ const parse_product = (product_url, callback) => {
 	data.title = $('h1').text().trim();
 	data.location = $('div.project-location').text().trim();
 	
-
 	getTopDetails($, data);
 
-	data.sale_units = $('div.header-detail-page-price:contains("For Sale")').find('span.header-detail-page-price__count-units').text().trim();;
-	data.sale_price = $('div.header-detail-page-price:contains("For Sale")').find('span.header-detail-page-price__rate').text().trim();;
+	data.sale_units = $('div.header-detail-page-price:contains("For Sale")').find('small.header-detail-page-price__count-units').text().trim();;
+	data.sale_price = $('div.header-detail-page-price:contains("For Sale")').find('span.header-detail-page-price__rate').text().trim();
+	data.rent_units = $('div.header-detail-page-price:contains("For Rent")').find('small.header-detail-page-price__count-units').text().trim();;
+	data.rent_price = $('div.header-detail-page-price:contains("For Rent")').find('span.header-detail-page-price__rate').text().trim();
+
 
 	data.leisure = getFacilities($, 'Leisure');
 	data.fitness = getFacilities($, 'Fitness');
 	data.convenience = getFacilities($, 'Convenience');
 	data.safety = getFacilities($, 'Safety');
+	data.parking = getManagment($, 'Parking &amp; Lift');
 
 
 
@@ -201,6 +204,22 @@ const getFacilities = ($, facility) => {
 	
 	// Find and iterate over each feature in the section
 	result.find('.project-features-item').each(function(i, elem) {
+		// Get the feature text and add it to the array
+		array.push($(this).text().trim());
+	});
+	
+	// Convert the array to a string, with features separated by commas
+	return array.join(', ');
+}
+
+const getManagment = ($, facility) => {
+	let array = [];
+	let result = $('.table-management').filter(function() {
+		return $(this).find('.management-title').text().trim() === facility;
+	});
+	
+	// Find and iterate over each feature in the section
+	result.find('.col-management').each(function(i, elem) {
 		// Get the feature text and add it to the array
 		array.push($(this).text().trim());
 	});
