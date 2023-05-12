@@ -1,6 +1,9 @@
 const mongoConnect = require('./utils/mongodb').mongoConnect;
 const Product = require('./models/product');
-const parse = require('./utils/parse').parse;
+//const parse = require('./utils/99.co/parse').parse;
+//const parse_product = require('./utils/99.co/parse').parse_product;
+const parse = require('./utils/fastwaz.com/parse').parse;
+const parse_product = require('./utils/fastwaz.com/parse').parse_product;
 const variables = require('./utils/args');
 
 let start = (variables['start']) ? parseInt(variables['start']) : 1;
@@ -10,12 +13,7 @@ let parse_id = (variables['parse_id']) ? variables['parse_id'] : '';
 
 let parse_links = [];
 
-parse_links[1] = 'https://www.99.co/id/jual/rumah/bali?harga_min=1,25mily&harga_maks=2mily&hlmn=';
-parse_links[2] = 'https://www.99.co/id/jual/rumah/bali?harga_min=2mily&harga_maks=3mily&hlmn=';
-parse_links[3] = 'https://www.99.co/id/jual/rumah/bali?harga_min=3mily&harga_maks=4,80mily&hlmn=';
-parse_links[4] = 'https://www.99.co/id/jual/rumah/bali?harga_min=4,80mily&harga_maks=9,50mily&hlmn=';
-parse_links[5] = 'https://www.99.co/id/jual/rumah/bali?harga_min=9,50mily&hlmn=';
-
+parse_links[1] = 'https://www.fazwaz.com/projects/thailand/phuket/thalang/si-sunthon/villa-qabalah';
 
 if(!parse_id && !parse_links[parse_id])
 {
@@ -24,6 +22,10 @@ if(!parse_id && !parse_links[parse_id])
 }
 
 const parse_link = parse_links[parse_id];
+
+parse_product(parse_link);
+
+return;
 
 mongoConnect(() => {
 	parse(parse_link, start, limit, timeout, (data) => {

@@ -1,10 +1,10 @@
 const https = require('https');
 const cheerio = require('cheerio');
 const moment = require('moment');
-const headers = require('./headers');
+const headers = require('../99.co/headers');
 const fs = require('fs');
 
-const filename = 'parse.txt';
+//const filename = 'parse.txt';
 
 // if (fs.existsSync(filename)) {
 // 	fs.unlink('parse.txt', (err) => {
@@ -75,6 +75,35 @@ let parse = (parse_link, parse_page, limit, timeout, callback) => {
 
 const parse_product = (product_url, callback) => {
 
+	//load product html file to variable, write function
+	const product_html = fs.readFileSync('product.html', 'utf8');
+	const $ = cheerio.load(product_html);
+	const data = {};
+
+	data.url = product_url;
+	data.title = $('h1').text().trim();
+	data.location = $('div.project-location').text().trim();
+	
+
+	getTopDetails($, data);
+
+	data.sale_units = $('div.header-detail-page-price:contains("For Sale")').find('span.header-detail-page-price__count-units').text().trim();;
+	data.sale_price = $('div.header-detail-page-price:contains("For Sale")').find('span.header-detail-page-price__rate').text().trim();;
+
+	data.leisure = getFacilities($, 'Leisure');
+	data.fitness = getFacilities($, 'Fitness');
+	data.convenience = getFacilities($, 'Convenience');
+	data.safety = getFacilities($, 'Safety');
+
+
+
+
+
+	
+	console.log(data);
+
+	return;
+
 	https.get(product_url, { headers }, (res) => {
 		let product_html = '';
 	
@@ -84,10 +113,12 @@ const parse_product = (product_url, callback) => {
 	
 		res.on('end', () => {
 
-		// fs.writeFile('product.html', product_html, (err) => {
-		// 	if (err) throw err;
-		// 	console.log('The file has been saved!');
-		// });
+		fs.writeFile('product.html', product_html, (err) => {
+			if (err) throw err;
+			console.log('The file has been saved!');
+		});
+
+		return;
 
 		const $ = cheerio.load(product_html);
 		const data = {};
@@ -136,6 +167,46 @@ const parse_product = (product_url, callback) => {
 	}).on('error', (err) => {
 		console.error(err);
 	});
+}
+
+
+const getTopDetails = ($, data) => {
+	$('.header-detail-page__right .property-info-element').each(function(i, elem) {
+
+		let key = $(this).find('small').text().trim().replace(' ', '').toLowerCase();
+		let value = $(this).clone().children().remove().end().text().trim();
+	
+		switch(key) {
+			case 'offplan':
+				data.date = value;
+				data.status = key;
+				break;
+			case 'units':
+				data.units = $(this).find("span#resultTotalUnit").text().trim();
+				break;
+			default:
+				data[key] = value;
+				break;
+		}	
+	});
+}
+
+
+const getFacilities = ($, facility) => {
+	let array = [];
+	// Find the 'Leisure' section
+	let result = $('.project-features-body').filter(function() {
+		return $(this).find('.project-features-body__title').text().trim() === facility;
+	});
+	
+	// Find and iterate over each feature in the section
+	result.find('.project-features-item').each(function(i, elem) {
+		// Get the feature text and add it to the array
+		array.push($(this).text().trim());
+	});
+	
+	// Convert the array to a string, with features separated by commas
+	return array.join(', ');
 }
 
 exports.parse = parse;
