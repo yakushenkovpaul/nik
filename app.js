@@ -13,7 +13,7 @@ let parse_id = (variables['parse_id']) ? variables['parse_id'] : '';
 
 let parse_links = [];
 
-parse_links[1] = 'https://www.fazwaz.com/projects/thailand/phuket/thalang/si-sunthon/villa-qabalah';
+parse_links[1] = 'https://www.fazwaz.com/project-directory/thailand/phuket?type=condo,apartment,penthouse&page=';
 
 if(!parse_id && !parse_links[parse_id])
 {
@@ -23,7 +23,9 @@ if(!parse_id && !parse_links[parse_id])
 
 const parse_link = parse_links[parse_id];
 
-parse_product(parse_link);
+parse(parse_link, start, limit, timeout, (data) => {});
+
+//parse_product(parse_link, (data)=>{ console.log(data) });
 
 return;
 

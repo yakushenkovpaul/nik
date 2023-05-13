@@ -1,7 +1,7 @@
 const https = require('https');
 const cheerio = require('cheerio');
 const moment = require('moment');
-const headers = require('../99.co/headers');
+const headers = require('../fastwaz.com/headers');
 const fs = require('fs');
 
 //const filename = 'parse.txt';
@@ -16,7 +16,7 @@ let parse = (parse_link, parse_page, limit, timeout, callback) => {
 
 	let current_parse_link = parse_link + parse_page;
 
-	const pageRegex = /hlmn=(\d+)/;
+	const pageRegex = /page=(\d+)/;
 	const match = pageRegex.exec(current_parse_link);
 	const nextpage = match ? parseInt(match[1]) + 1 : 1;
 
@@ -37,13 +37,16 @@ let parse = (parse_link, parse_page, limit, timeout, callback) => {
 
 			const $ = cheerio.load(html);
 
-			const urls = $('a.ui-molecules-secondary-card__link');
+			const urls = $('div.site-map-item').find('a');
 
 			let num = urls.length;
 
+			console.log('num: ' + num);
+			return;
+
 			if(num === 0)
 			{
-				console.log('There is no data in this page. Update headers.js');
+				console.log('There is no data in this page. Plz check your settings');
 			}
 
 			if(num > 0) {
@@ -57,7 +60,7 @@ let parse = (parse_link, parse_page, limit, timeout, callback) => {
 						if(num === 0)
 						{
 							setTimeout(() => {
-								if ($('i[aria-label="chevron_right"]').length > 0) {
+								if ($('i.page-item pagination-next-nav').length > 0) {
 									if(nextpage < limit)
 									{
 										parse(parse_link, nextpage, limit, timeout, callback);
@@ -75,38 +78,6 @@ let parse = (parse_link, parse_page, limit, timeout, callback) => {
 
 const parse_product = (product_url, callback) => {
 
-	//load product html file to variable, write function
-	const product_html = fs.readFileSync('product.html', 'utf8');
-	const $ = cheerio.load(product_html);
-	const data = {};
-
-	data.url = product_url;
-	data.title = $('h1').text().trim();
-	data.location = $('div.project-location').text().trim();
-	
-	getTopDetails($, data);
-
-	data.sale_units = $('div.header-detail-page-price:contains("For Sale")').find('small.header-detail-page-price__count-units').text().trim();;
-	data.sale_price = $('div.header-detail-page-price:contains("For Sale")').find('span.header-detail-page-price__rate').text().trim();
-	data.rent_units = $('div.header-detail-page-price:contains("For Rent")').find('small.header-detail-page-price__count-units').text().trim();;
-	data.rent_price = $('div.header-detail-page-price:contains("For Rent")').find('span.header-detail-page-price__rate').text().trim();
-
-
-	data.leisure = getFacilities($, 'Leisure');
-	data.fitness = getFacilities($, 'Fitness');
-	data.convenience = getFacilities($, 'Convenience');
-	data.safety = getFacilities($, 'Safety');
-	data.parking = getManagment($, 'Parking &amp; Lift');
-
-
-
-
-
-	
-	console.log(data);
-
-	return;
-
 	https.get(product_url, { headers }, (res) => {
 		let product_html = '';
 	
@@ -116,55 +87,46 @@ const parse_product = (product_url, callback) => {
 	
 		res.on('end', () => {
 
-		fs.writeFile('product.html', product_html, (err) => {
-			if (err) throw err;
-			console.log('The file has been saved!');
-		});
-
-		return;
+		// fs.writeFile('product.html', product_html, (err) => {
+		// 	if (err) throw err;
+		// 	console.log('The file has been saved!');
+		// });
 
 		const $ = cheerio.load(product_html);
 		const data = {};
 
-		const jsonStr = $('#__NEXT_DATA__').text();
+		data.url = product_url;
+		data.title = clearString($('h1').text().trim());
+		//data.information = clearString($('.about-project__text-description').text().trim());
+		data.information = $('.about-project').text().trim();
+		data.area_information = $('.google-map-api-inner').text().trim();
+		data.location = $('div.project-location').text().trim();
+		
+		getTopDetails($, data);
 	
-		if(jsonStr.length > 0)
+		data.sale_units = $('div.header-detail-page-price:contains("For Sale")').find('small.header-detail-page-price__count-units').text().trim();;
+		data.sale_price = $('div.header-detail-page-price:contains("For Sale")').find('span.header-detail-page-price__rate').text().trim();
+		data.rent_units = $('div.header-detail-page-price:contains("For Rent")').find('small.header-detail-page-price__count-units').text().trim();;
+		data.rent_price = $('div.header-detail-page-price:contains("For Rent")').find('span.header-detail-page-price__rate').text().trim();
+		data.developer = $('a.developer-info__developer-all').attr('href');
+	
+	
+		data.leisure = getFacilities($, 'Leisure');
+		data.fitness = getFacilities($, 'Fitness');
+		data.convenience = getFacilities($, 'Convenience');
+		data.safety = getFacilities($, 'Safety');
+		data.parking = getParking($, 'Parking & Lift');
+		data.managment = getManagment($, 'Management');
+		data.address = getAdress(product_html);
+		data.payment_plan = getPaymentPlan($, data);
+
+		if(data.address !== '')
 		{
-			const jsonObj = JSON.parse(jsonStr);
-			const temp = jsonObj['props']['pageProps']['data'];
-
-			if(temp === undefined)	
-			{
-				callback(data);
-			}
-			else {
-				data.url = product_url;
-
-				data.updatedDate = (temp['timestamps']['updated']) ? moment.unix(temp['timestamps']['updated']).format('DD-MM-YY') : '';
-				data.title = (temp['title']) ? temp['title'] : '';
-				data.type = (temp['attributes']['property_type']['value']) ? temp['attributes']['property_type']['value'] : '';
-				data.description = (temp['description']) ? temp['description'] : '';
-				data.agent = (temp['agent']['username']) ? temp['agent']['username'] : '';
-				data.province = (temp['location']['province']['name']) ? temp['location']['province']['name'] : '';
-				data.city = (temp['location']['city']['name']) ? temp['location']['city']['name'] : '';
-				data.district = (temp['location']['district']['name']) ? temp['location']['district']['name'] : '';
-				data.address = (temp['location']['address_1']) ? temp['location']['address_1'] : '';
-				data.fulladdress = (temp['full_address']) ? temp['full_address'] : '';
-				data.location_lat = (temp['location_pin']['lat']) ? temp['location_pin']['lat'] : '';
-				data.location_lng = (temp['location_pin']['long']) ? temp['location_pin']['long'] : '';
-				data.bedrooms = (temp['attributes']['bedrooms']) ? temp['attributes']['bedrooms'] : 0;
-				data.bathrooms = (temp['attributes']['bathrooms']) ? temp['attributes']['bathrooms'] : 0;
-				data.floors = (temp['attributes']['floors']) ? temp['attributes']['floors'] : 0;
-				data.buildSize = (temp['attributes']['builtup_area']['value']) ? temp['attributes']['builtup_area']['value'] : 0;
-				data.landSize = (temp['attributes']['land_area']['value']) ? temp['attributes']['land_area']['value'] : 0;
-				data.price = (temp['price']['price']) ? temp['price']['price'] : 0;
-				data.price_type = (temp['attributes']['price_type']['value']) ? temp['attributes']['price_type']['value'] : '';
-				data.garages = (temp['attributes']['garages']) ? temp['attributes']['garages'] : 0;
-				data.carports = (temp['attributes']['carports']) ? temp['attributes']['carports'] : 0;
-				data.certificate = (temp['attributes']['certificate']['value']) ? temp['attributes']['certificate']['value'] : '';
-			}
-
 			callback(data);
+		}
+		else
+		{
+			console.log('There is no address in this page. Plz check your settings');
 		}
 		});
 	}).on('error', (err) => {
@@ -172,6 +134,42 @@ const parse_product = (product_url, callback) => {
 	});
 }
 
+exports.parse = parse;
+exports.parse_product = parse_product;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//addition functions
+
+const getAdress = (html) => {
+	let match = html.match(/"streetAddress":"(.*?)"/);
+	return match ? match[1] : null;
+}
+
+const getPaymentPlan = ($, data) => {
+	let array = [];
+	$('.project-payment__body').each(function(i, elem) {
+		array.push($(this).text().trim());
+	});
+	return array.join(', ');
+}
 
 const getTopDetails = ($, data) => {
 	$('.header-detail-page__right .property-info-element').each(function(i, elem) {
@@ -181,6 +179,10 @@ const getTopDetails = ($, data) => {
 	
 		switch(key) {
 			case 'offplan':
+				data.date = value;
+				data.status = key;
+				break;
+			case 'completed':
 				data.date = value;
 				data.status = key;
 				break;
@@ -194,12 +196,11 @@ const getTopDetails = ($, data) => {
 	});
 }
 
-
-const getFacilities = ($, facility) => {
+const getFacilities = ($, input) => {
 	let array = [];
 	// Find the 'Leisure' section
 	let result = $('.project-features-body').filter(function() {
-		return $(this).find('.project-features-body__title').text().trim() === facility;
+		return $(this).find('.project-features-body__title').text().trim() === input;
 	});
 	
 	// Find and iterate over each feature in the section
@@ -212,21 +213,37 @@ const getFacilities = ($, facility) => {
 	return array.join(', ');
 }
 
-const getManagment = ($, facility) => {
+const getManagment = ($, input) => {
 	let array = [];
 	let result = $('.table-management').filter(function() {
-		return $(this).find('.management-title').text().trim() === facility;
+		return $(this).find('.management-title').text().trim() === input;
 	});
 	
 	// Find and iterate over each feature in the section
 	result.find('.col-management').each(function(i, elem) {
-		// Get the feature text and add it to the array
-		array.push($(this).text().trim());
+    let spanText = $(this).clone().children('.features-tooltip-icon, .features-tooltip-inner').remove().end().text().trim().replace(/\n/g, '').replace(':', ': ');
+    array.push(spanText);
 	});
 	
 	// Convert the array to a string, with features separated by commas
 	return array.join(', ');
 }
 
-exports.parse = parse;
-exports.parse_product = parse_product;
+const getParking = ($, input) => {
+	let array = [];
+	let result = $('.table-category').filter(function() {
+		return $(this).find('.category-title').text().trim() === input;
+	});
+	
+	// Find and iterate over each feature in the section
+	result.find('.col-features').each(function(i, elem) {
+		array.push($(this).text().trim().replace(/\n/g, ''));
+	});
+	
+	// Convert the array to a string, with features separated by commas
+	return array.join(', ');
+}
+
+const clearString = (input) => {
+	return input.replace(/\n/g, '').replace(/\s\s+/g, ' ').trim();
+}
