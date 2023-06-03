@@ -1,9 +1,7 @@
 const mongoConnect = require('./utils/mongodb').mongoConnect;
 const Product = require('./models/product');
-//const parse = require('./utils/99.co/parse').parse;
-//const parse_product = require('./utils/99.co/parse').parse_product;
-const parse = require('./utils/fastwaz.com/parse').parse;
-const parse_product = require('./utils/fastwaz.com/parse').parse_product;
+const parse = require('./utils/fastwaz.com/condo/parse').parse;
+const parse_product = require('./utils/fastwaz.com/condo/parse').parse_product;
 const variables = require('./utils/args');
 
 let start = (variables['start']) ? parseInt(variables['start']) : 1;
@@ -13,7 +11,7 @@ let parse_id = (variables['parse_id']) ? variables['parse_id'] : '';
 
 let parse_links = [];
 
-parse_links[1] = 'https://www.fazwaz.com/project-directory/thailand/phuket?type=condo,apartment,penthouse&page=';
+parse_links[1] = 'https://www.fazwaz.com/property-for-sale/thailand/phuket?type=condo,apartment,penthouse&order_by=rank|asc&page=';
 
 if(!parse_id && !parse_links[parse_id])
 {
@@ -23,11 +21,11 @@ if(!parse_id && !parse_links[parse_id])
 
 const parse_link = parse_links[parse_id];
 
-parse(parse_link, start, limit, timeout, (data) => {});
+//parse(parse_link, start, limit, timeout, (data) => {});
 
 //parse_product(parse_link, (data)=>{ console.log(data) });
 
-return;
+//return;
 
 mongoConnect(() => {
 	parse(parse_link, start, limit, timeout, (data) => {

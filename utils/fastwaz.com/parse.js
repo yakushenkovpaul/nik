@@ -37,12 +37,11 @@ let parse = (parse_link, parse_page, limit, timeout, callback) => {
 
 			const $ = cheerio.load(html);
 
+			//const urls = $('a.link-unit');
+
 			const urls = $('div.site-map-item').find('a');
 
 			let num = urls.length;
-
-			console.log('num: ' + num);
-			return;
 
 			if(num === 0)
 			{
@@ -60,12 +59,12 @@ let parse = (parse_link, parse_page, limit, timeout, callback) => {
 						if(num === 0)
 						{
 							setTimeout(() => {
-								if ($('i.page-item pagination-next-nav').length > 0) {
+								//if ($('i.page-item pagination-next-nav').length > 0) {
 									if(nextpage < limit)
 									{
 										parse(parse_link, nextpage, limit, timeout, callback);
 									}
-								}
+								//}
 							}, timeout);
 						}
 	
