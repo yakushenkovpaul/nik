@@ -1,8 +1,8 @@
-const mongoConnect = require('./utils/mongodb').mongoConnect;
-const Product = require('./models/product');
-const parse = require('./utils/fastwaz.com/condo/parse').parse;
-const parse_product = require('./utils/fastwaz.com/condo/parse').parse_product;
-const variables = require('./utils/args');
+const mongoConnect = require('../../utils/mongodb').mongoConnect;
+const Product = require('../../models/product');
+const parse = require('./condo_rent/parse').parse;
+const parse_product = require('./condo_rent/parse').parse_product;
+const variables = require('../../utils/args');
 
 let start = (variables['start']) ? parseInt(variables['start']) : 1;
 let limit = (variables['limit']) ? parseInt(variables['limit']) : 500;
@@ -11,7 +11,8 @@ let parse_id = (variables['parse_id']) ? variables['parse_id'] : '';
 
 let parse_links = [];
 
-parse_links[1] = 'https://www.fazwaz.com/property-for-sale/thailand/phuket?type=condo,apartment,penthouse&order_by=rank|asc&page=';
+parse_links[1] = 'https://www.fazwaz.com/property-for-rent/thailand/phuket?type=condo,apartment,penthouse&order_by=rank|asc&page=';
+//parse_links[1] = 'https://www.fazwaz.com/property-rent/4-bedroom-condo-for-rent-at-kamala-regent-in-kamala-phuket-u73422';
 
 if(!parse_id && !parse_links[parse_id])
 {
@@ -31,7 +32,7 @@ mongoConnect(() => {
 	parse(parse_link, start, limit, timeout, (data) => {
 		if(data.url !== undefined && data.url.length > 0)
 		{
-			const product = new Product(data.url, data)
+			const product = new Product(data.url, data, 'products_rent')
 			.save()
 			.then(result => {
 				console.log('added to db: ' + data.url);

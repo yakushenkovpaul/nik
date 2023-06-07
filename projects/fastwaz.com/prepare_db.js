@@ -1,9 +1,9 @@
 const MongoClient = require('mongodb').MongoClient;
-const Product = require('./models/product');
-const BasicInformation = require('./utils/fastwaz.com/prepare/basicInformation');
-const Features = require('./utils/fastwaz.com/prepare/features');
-const ProjectFeatures = require('./utils/fastwaz.com/prepare/projectFeatures');
-const unitInvestment = require('./utils/fastwaz.com/prepare/unitInvestment');
+const Product = require('../../models/product');
+const BasicInformation = require('./prepare_db/basicInformation');
+const Features = require('./prepare_db/features');
+const ProjectFeatures = require('./prepare_db/projectFeatures');
+const unitInvestment = require('./prepare_db/unitInvestment');
 
 loadAndProcessProducts();
 
@@ -18,8 +18,8 @@ async function loadAndProcessProducts() {
         console.log("Connected successfully to server");
     
         const db = client.db(dbName);
-        const collection = db.collection('raw_products');
-				const destinationCollection = db.collection('products');
+        const collection = db.collection('products_rent');
+				const destinationCollection = db.collection('products_rent_raw');
     
         const totalDocs = await collection.countDocuments({});
         const totalPages = Math.ceil(totalDocs / batchSize);
